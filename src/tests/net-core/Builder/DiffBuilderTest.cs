@@ -486,6 +486,24 @@ namespace Org.XmlUnit.Builder {
             Assert.IsFalse(myDiff.HasDifferences(), "XML similar " + myDiff.ToString());
         }
 
+        [Test]
+        public void CanIgnoreSequenceOfChildNodes() {
+            var xml1 = "<A><B>1</B><C>2</C></A>";
+            var xml2 = "<A><C>2</C><B>1</B></A>";
+
+            var source1 = Input.FromString(xml1).Build();
+            var source2 = Input.FromString(xml2).Build();
+
+            var diff = DiffBuilder
+                .Compare(source1)
+                .WithTest(source2)
+                .WithDifferenceEvaluator(DifferenceEvaluators.DowngradeDifferencesToEqual(ComparisonType.CHILD_NODELIST_SEQUENCE))
+                .WithNodeMatcher(new DefaultNodeMatcher(ElementSelectors.ByName))
+                .CheckForSimilar()
+                .Build();
+            Assert.IsFalse(diff.HasDifferences(), "XML equal " + diff);
+        }
+
         internal class DummyComparisonFormatter : IComparisonFormatter {
             public string GetDescription(Comparison difference) {
                 return "foo";
